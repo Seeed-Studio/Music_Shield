@@ -1,25 +1,34 @@
-//  File MusicPlayer.h
-//
-//  For more details about the product please check http://www.seeedstudio.com/depot/
-//  Copyright (c) 2012 seeed technology inc.
-//  Author: Frankie.Chu
-//  Version: 2.0
-//  Time: June 10, 2012
-//  Changing records:
-//
-//  This library is free software; you can redistribute it and/or
-//  modify it under the terms of the GNU Lesser General Public
-//  License as published by the Free Software Foundation; either
-//  version 2.1 of the License, or (at your option) any later version.
-//
-//  This library is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//  Lesser General Public License for more details.
-//
-//  You should have received a copy of the GNU Lesser General Public
-//  License along with this library; if not, write to the Free Software
-//  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+/*
+ * MusicPlayer.h
+ * A library for MusicShield 2.0
+ *
+ * Copyright (c) 2012 seeed technology inc.
+ * Website    : www.seeed.cc
+ * Author     : Jack Shao (jacky.shaoxg@gmail.com)
+ * Create Time: Mar 2014
+ * Change Log :
+ *
+ * The MIT License (MIT)
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
 #ifndef MUSICPLAYER_H
 #define MUSICPLAYER_H
 
@@ -48,12 +57,12 @@
 
 /** Playing states definations. */
 volatile typedef enum {
-  PS_IDLE = 0,     /**< Player idle                                        */     
-  PS_PLAY,         /**< Start to player                                    */     
-  PS_PAUSE,        /**< Pause play                                         */     
-  PS_PRE_PLAY,     /**< Pre-play state                                     */     
-  PS_POST_PLAY,    /**< Post-play state                                    */     
-  PS_PRE_RECORD,   /**< Pre-recording state                                */     
+  PS_IDLE = 0,     /**< Player idle                                        */
+  PS_PLAY,         /**< Start to player                                    */
+  PS_PAUSE,        /**< Pause play                                         */
+  PS_PRE_PLAY,     /**< Pre-play state                                     */
+  PS_POST_PLAY,    /**< Post-play state                                    */
+  PS_PRE_RECORD,   /**< Pre-recording state                                */
   PS_RECORDING,    /**< Recording states                                   */
   PS_POST_RECORD   /**< Post-recording state                               */
 } playingstatetype;
@@ -63,17 +72,17 @@ extern  playingstatetype playingState;
 volatile typedef enum
 {
   CS_EMPTY = 0,      /**< Have no control                                     */
-  CS_PLAYPAUSE,      /**< Play/pause button pressed                           */       
-  CS_PLAYPAUSE_LONG, /**< Play/pause button long pressed                      */              
+  CS_PLAYPAUSE,      /**< Play/pause button pressed                           */
+  CS_PLAYPAUSE_LONG, /**< Play/pause button long pressed                      */
   CS_UP,             /**< Up button pressed                                   */
-  CS_UP_LONG,        /**< Up button long pressed                              */      
+  CS_UP_LONG,        /**< Up button long pressed                              */
   CS_DOWN,           /**< Down button pressed                                 */
-  CS_DOWN_LONG,      /**< Down button long pressed                            */       
+  CS_DOWN_LONG,      /**< Down button long pressed                            */
   CS_NEXT,           /**< Right button pressed                                */
   CS_NEXT_LONG,      /**< Right button long pressed                           */
   CS_PREV,           /**< Left button pressed                                 */
   CS_PREV_LONG,      /**< Left button long pressed                            */
-} ctrlState_t; 
+} ctrlState_t;
 extern ctrlState_t ctrlState;
 
 /** Play modes definations. */
@@ -83,7 +92,7 @@ typedef enum
   PM_SHUFFLE_PLAY = 1,  /**< Request to shuffle play according to the list          */
   PM_REPEAT_LIST = 2,   /**< Request to repeat play according to the list           */
   PM_REPEAT_ONE = 3     /**< Request to repeat play a song according to in the list */
-} playMode_t; 
+} playMode_t;
 
 /****************structure for songs playlist*****************/
 typedef struct songDesc
@@ -119,10 +128,10 @@ public:
   void setPara(unsigned char io,
                unsigned char mode,
                unsigned int long_press_duration,
-               unsigned int return_value); 
+               unsigned int return_value);
   void scan(void);
   int getPress(void);
-  
+
 private:
   unsigned char _io;
   unsigned char _mode;
@@ -132,30 +141,30 @@ private:
   unsigned int  _st_to_return;
   unsigned char _keycnt;
   boolean       _mode3_shoot;
-}; 
+};
 
 /*****************class for the music player*******************/
 class MusicPlayer
 {
 public:
   void    begin(void);
-  void    beginInMidiFmt(void);  
+  void    beginInMidiFmt(void);
 
   void    playOne(char *songName);
   boolean addToPlaylist(char *songName);
   void    scanAndPlayAll(void);
   void    attachDigitOperation(int pinNum, void (*userFunc)(void), int mode);
   void    attachAnalogOperation(int pinNum, void (*userFunc)(void));
-  
+
   void    setVolume(unsigned char volume) { vs1053.setVolume(volume, volume); _volume = volume;}
   void    adjustVolume(boolean UpOrDown, unsigned char NumSteps = 6);
   void    setPlayMode(playMode_t playmode) { _playmode = playmode;}
-  boolean deleteSong(char *songName); 
+  boolean deleteSong(char *songName);
   void    keyEnable(void)    { Key_Disable = 0;}
   void    keyDisable(void)   { Key_Disable = 1;}
   void    analogControlEnable(void) { Analog_Enable = 1;}
   void    digitalControlEnable(void) { Digital_Enable = 1;}
-          
+
   void    play(void);
   void    midiDemoPlayer(void);		//oliver wang
   void    opPlay(void)  { playingState = PS_PLAY;}
@@ -167,7 +176,7 @@ public:
   void    opPreviousSong(void) { ctrlState = CS_PREV;}
   void    opFastForward() {ctrlState = CS_NEXT_LONG;}
   void    opFastRewind()  {ctrlState = CS_PREV_LONG;}
-  void    _hardtime_update(void); 
+  void    _hardtime_update(void);
 
 private:
   unsigned char _volume;
@@ -192,7 +201,7 @@ private:
   void    scanDigitalSensor(void);
   void    controlLED(void);
   boolean playlistIsFull(void);
-  boolean _inPlayList(uint16_t); 
+  boolean _inPlayList(uint16_t);
   void    _play();
   void    LoadUserCode(void);
   void    _preRecording(void);
