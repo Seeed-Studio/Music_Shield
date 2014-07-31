@@ -9,7 +9,7 @@ it to play sound files from SD card and do short-time recording as well.
 
 **This library is for MusicShield hardware version 2.0.**
 
-**For hardware version 1.0, please checkout the "hardware_version_1.0" branch of this repository.**
+For hardware version 1.0, please visit the [wiki page](http://www.seeedstudio.com/wiki/Music_Shield_V1.0) for demo codes.
 
 The music player reads data from SD card and then feed into the VS1053 chip via SPI bus. This is done in TIMER1's
 ISR with a interval of 2ms. This job has a high priority and uses the cpu exclusively. In the spare cpu time, player
