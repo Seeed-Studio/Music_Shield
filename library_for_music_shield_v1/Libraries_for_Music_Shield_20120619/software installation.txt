@@ -1,9 +1,0 @@
-1.Make sure there are songs in the micro sd card which should be formatted as FAT16.
-
-2.Put the folders of MusicPlayer_v1_7,Fat16 and newSPI in Arduino-1.0 program: ..\arduino-1.0\libraries.The NewSPI library is based on the SPI library in the libraries of Arduino-1.0.
-And the Fat16 library is downloaded from the google code.
-http://code.google.com/p/fat16lib/downloads/detail?name=fat16lib20111205.zip&can=2&q=
-
-3.Select the corresponding Arduino board, like Arduino UNO or Duemilanove or others.
-
-4.Run the arduino program compile and upload the sketch of examples in MusicPlayer_v1_7 into Arduino board.
