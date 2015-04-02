@@ -39,7 +39,9 @@ Need to connect a button to D2
 #include <arduino.h>
 #include <MusicPlayer.h>
 
-int flag = 0;
+int which_play = 0;
+char mp3name[2][10] = {"2.mp3", "1.mp3"};
+int flag=0;
 
 void setup(void)
 {
@@ -48,20 +50,24 @@ void setup(void)
   player.keyDisable();
   player.setPlayMode(PM_REPEAT_ONE); //set mode to repeat playing a song
   player.playOne("1.mp3");
-  attachInterrupt(0, change, FALLING);
+  attachInterrupt(0, change, CHANGE);
 }
+
 void loop(void)
-{ 
+{
+
   player.play();
-  if (flag)
-  {
-    player.playOne("2.mp3");
-    flag = 0;
-  }
+  
+    if(flag)
+    {
+        flag = 0;
+        player.playOne(mp3name[which_play]);
+        which_play = 1-which_play;
+    }
 }
 
 void change()
 {
-  flag = 1;
+    flag = 1;
 }
 
