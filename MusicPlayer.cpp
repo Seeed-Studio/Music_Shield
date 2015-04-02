@@ -378,7 +378,7 @@ void MusicPlayer::_play(void)
 /**************************************************************/
 void MusicPlayer::playOne(char *songFile)
 {
-  SdFile f;
+  /*SdFile f;
   if (!f.open(&root, songFile, O_READ))
   {
     Serial.print(songFile);
@@ -386,10 +386,31 @@ void MusicPlayer::playOne(char *songFile)
     return;
   }
   f.close();
-  if (!_inPlayList(root.dirIndex( )))
+  uint16_t index = root.dirIndex();
+  if (!_inPlayList(index))
   {
     addToPlaylist(songFile);
+  }*/
+  if (addToPlaylist(songFile))
+  {
+    //added by shao
+    //switch to this song
+    for(int i = 0; i<spl.songTotalNum; i++)
+    {
+      if (strcmp(songFile, spl.p_songFile[i]->name) == 0)
+      {
+        showString(PSTR("Seeked to "));
+        Serial.println(songFile);
+        spl.currentSongNum = i;
+        playingState = PS_PRE_PLAY;
+      }
+    }
+  }else
+  {
+    showString(PSTR("Failed to add.\r\n"));
   }
+  
+
 }
 
 /**************************************************************/
@@ -486,7 +507,7 @@ boolean MusicPlayer::_addToPlaylist(uint16_t index, char *songName) //add a song
   {
     Serial.print(songName);
     showString(PSTR(" already exists in playlist.\r\n"));
-    return false;
+    return true;
   }
 
   SdFile f;
