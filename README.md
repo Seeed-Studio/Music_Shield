@@ -99,6 +99,7 @@ create an empty playlist<br>
     void        play(void)
     void        opPlay(void)  
     void        opPause(void) 
+    void        opResume(void)
     void        opStop(void)  
     void        opVolumeUp(void)  
     void        opVolumeDown(void)  
