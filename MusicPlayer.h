@@ -167,8 +167,9 @@ public:
 
   void    play(void);
   void    midiDemoPlayer(void);		//oliver wang
-  void    opPlay(void)  { playingState = PS_PLAY;}
+  void    opPlay(void)  { playingState = PS_PRE_PLAY;}
   void    opPause(void) { playingState = PS_PAUSE;}
+  void    opResume(void) { playingState = PS_PLAY;}
   void    opStop(void)  { playingState = PS_IDLE;}
   void    opVolumeUp()    {ctrlState = CS_UP;}
   void    opVolumeDown(void)  { ctrlState = CS_DOWN;}
