@@ -156,14 +156,14 @@ public:
   void    attachDigitOperation(int pinNum, void (*userFunc)(void), int mode);
   void    attachAnalogOperation(int pinNum, void (*userFunc)(void));
 
-  void    setVolume(unsigned char volume) { vs1053.setVolume(volume, volume); _volume = volume;}
+  void    setVolume(unsigned char volume);
   void    adjustVolume(boolean UpOrDown, unsigned char NumSteps = 6);
-  void    setPlayMode(playMode_t playmode) { _playmode = playmode;}
+  void    setPlayMode(playMode_t playmode);
   boolean deleteSong(char *songName);
-  void    keyEnable(void)    { Key_Disable = 0;}
-  void    keyDisable(void)   { Key_Disable = 1;}
-  void    analogControlEnable(void) { Analog_Enable = 1;}
-  void    digitalControlEnable(void) { Digital_Enable = 1;}
+  void    keyEnable(void);
+  void    keyDisable(void);
+  void    analogControlEnable(void);
+  void    digitalControlEnable(void);
 
   void    play(void);
   void    midiDemoPlayer(void);
