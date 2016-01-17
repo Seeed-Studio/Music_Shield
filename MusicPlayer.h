@@ -56,7 +56,7 @@
 #define ENABLE_NUM_ANALOG 2     //for A4/A5
 
 /** Playing states definations. */
-volatile typedef enum {
+typedef enum {
   PS_IDLE = 0,     /**< Player idle                                        */
   PS_PLAY,         /**< Start to player                                    */
   PS_PAUSE,        /**< Pause play                                         */
@@ -69,7 +69,7 @@ volatile typedef enum {
 extern  playingstatetype playingState;
 
 /** Control states definations. */
-volatile typedef enum
+typedef enum
 {
   CS_EMPTY = 0,      /**< Have no control                                     */
   CS_PLAYPAUSE,      /**< Play/pause button pressed                           */
