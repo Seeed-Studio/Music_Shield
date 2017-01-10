@@ -156,27 +156,27 @@ public:
   void    attachDigitOperation(int pinNum, void (*userFunc)(void), int mode);
   void    attachAnalogOperation(int pinNum, void (*userFunc)(void));
 
-  void    setVolume(unsigned char volume) { vs1053.setVolume(volume, volume); _volume = volume;}
+  void    setVolume(unsigned char volume);
   void    adjustVolume(boolean UpOrDown, unsigned char NumSteps = 6);
-  void    setPlayMode(playMode_t playmode) { _playmode = playmode;}
+  void    setPlayMode(playMode_t playmode);
   boolean deleteSong(char *songName);
-  void    keyEnable(void)    { Key_Disable = 0;}
-  void    keyDisable(void)   { Key_Disable = 1;}
-  void    analogControlEnable(void) { Analog_Enable = 1;}
-  void    digitalControlEnable(void) { Digital_Enable = 1;}
+  void    keyEnable(void);
+  void    keyDisable(void);
+  void    analogControlEnable(void);
+  void    digitalControlEnable(void);
 
   void    play(void);
-  void    midiDemoPlayer(void);		//oliver wang
-  void    opPlay(void)  { playingState = PS_PRE_PLAY;}
-  void    opPause(void) { playingState = PS_PAUSE;}
-  void    opResume(void) { playingState = PS_PLAY;}
-  void    opStop(void)  { playingState = PS_IDLE;}
-  void    opVolumeUp()    {ctrlState = CS_UP;}
-  void    opVolumeDown(void)  { ctrlState = CS_DOWN;}
-  void    opNextSong(void)    { ctrlState = CS_NEXT;}
-  void    opPreviousSong(void) { ctrlState = CS_PREV;}
-  void    opFastForward() {ctrlState = CS_NEXT_LONG;}
-  void    opFastRewind()  {ctrlState = CS_PREV_LONG;}
+  void    midiDemoPlayer(void);
+  void    opPlay(void);
+  void    opPause(void);
+  void    opResume(void);
+  void    opStop(void);
+  void    opVolumeUp(void);
+  void    opVolumeDown(void);
+  void    opNextSong(void);
+  void    opPreviousSong(void);
+  void    opFastForward(void);
+  void    opFastRewind(void);
   void    _hardtime_update(void);
 
 private:
@@ -203,11 +203,11 @@ private:
   void    controlLED(void);
   boolean playlistIsFull(void);
   boolean _inPlayList(uint16_t);
-  void    _play();
+  void    _play(void);
   void    LoadUserCode(void);
   void    _preRecording(void);
   void    _recording(void);
-  void    _init_timer1();
+  void    _init_timer1(void);
 
   //for Midi Player
   void midiWriteData(byte cmd, byte high, byte low);

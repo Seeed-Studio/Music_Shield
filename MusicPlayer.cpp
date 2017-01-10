@@ -1041,4 +1041,20 @@ void MusicPlayer::midiDemoPlayer(void)
     }
 }
 
+void    MusicPlayer::setVolume(unsigned char volume) { vs1053.setVolume(volume, volume); _volume = volume; }
+void    MusicPlayer::setPlayMode(playMode_t playmode) { _playmode = playmode; }
+void    MusicPlayer::keyEnable(void)    { Key_Disable = 0; }
+void    MusicPlayer::keyDisable(void)   { Key_Disable = 1; }
+void    MusicPlayer::analogControlEnable(void)  { Analog_Enable = 1; }
+void    MusicPlayer::digitalControlEnable(void) { Digital_Enable = 1; }
 
+void    MusicPlayer::opPlay(void)   { playingState = PS_PRE_PLAY; }
+void    MusicPlayer::opPause(void)  { playingState = PS_PAUSE; }
+void    MusicPlayer::opResume(void) { playingState = PS_PLAY; }
+void    MusicPlayer::opStop(void)   { playingState = PS_IDLE; }
+void    MusicPlayer::opVolumeUp(void)     { ctrlState = CS_UP; }
+void    MusicPlayer::opVolumeDown(void)   { ctrlState = CS_DOWN; }
+void    MusicPlayer::opNextSong(void)     { ctrlState = CS_NEXT; }
+void    MusicPlayer::opPreviousSong(void) { ctrlState = CS_PREV; }
+void    MusicPlayer::opFastForward(void)  { ctrlState = CS_NEXT_LONG; }
+void    MusicPlayer::opFastRewind(void)   { ctrlState = CS_PREV_LONG; }
