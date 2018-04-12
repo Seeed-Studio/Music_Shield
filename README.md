@@ -1,7 +1,10 @@
 Music Shield V2.0
 -------------
 
-[![ms2](http://www.seeedstudio.com/wiki/images/thumb/4/43/Music_Shield_Picture.jpg/400px-Music_Shield_Picture.jpg)](http://www.seeedstudio.com/depot/music-shield-v20-p-1372.html?cPath=38)
+<img src=https://statics3.seeedstudio.com/seeed/img/2016-10/8QVKbEtetX6Vot3RsGFDInE4.jpg width=400><img src=https://statics3.seeedstudio.com/seeed/img/2016-10/WQMT4JY83Grqzo7Ge5aDlZIu.jpg width=400>
+
+
+[Music Shield V2.0](https://www.seeedstudio.com/s/Music-Shield-V2.0-p-1372.html)
 
 Music Shield is an audio encoder/decoder compatible with Arduino, Seeeduino,<br>
 Seeeduino Mega and Arduino Mega. It is based on the VC1053B chip, which enabled <br>
@@ -9,7 +12,7 @@ it to play sound files from SD card and do short-time recording as well.
 
 **This library is for MusicShield hardware version 2.0.**
 
-For hardware version 1.0, please visit the [wiki page](http://www.seeedstudio.com/wiki/Music_Shield_V1.0) for demo codes.
+For hardware version 1.0, please visit the [wiki page](http://wiki.seeedstudio.com/Music_Shield_V2.2/) for demo codes.
 
 The music player reads data from SD card and then feed into the VS1053 chip via SPI bus. This is done in TIMER1's
 ISR with a interval of 2ms. This job has a high priority and uses the cpu exclusively. In the spare cpu time, player
@@ -132,6 +135,6 @@ global distributors and partners to push open hardware movement.<br>
 
 
 
-[![Analytics](https://ga-beacon.appspot.com/UA-46589105-3/Music_ShieldV2)](https://github.com/igrigorik/ga-beacon)
+[![Analytics](https://ga-beacon.appspot.com/UA-46589105-3/Music_Shield)](https://github.com/igrigorik/ga-beacon)
 
 
