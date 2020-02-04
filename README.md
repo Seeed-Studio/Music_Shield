@@ -1,4 +1,4 @@
-Music Shield V2.0
+Music Shield V2.0  [![Build Status](https://travis-ci.com/Seeed-Studio/Music_Shield.svg?branch=master)](https://travis-ci.com/Seeed-Studio/Music_Shield)
 -------------
 
 <img src=https://statics3.seeedstudio.com/seeed/img/2016-10/8QVKbEtetX6Vot3RsGFDInE4.jpg width=400><img src=https://statics3.seeedstudio.com/seeed/img/2016-10/WQMT4JY83Grqzo7Ge5aDlZIu.jpg width=400>
