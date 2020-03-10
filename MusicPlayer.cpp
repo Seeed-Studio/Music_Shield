@@ -77,63 +77,90 @@ void showString(PGM_P s) {
         Serial.print(c);
     }
 }
-
-/**************************************************************/
-ISR(TIMER1_OVF_vect) {        //Timer1 Service
-    //fill vs1053
-    while (digitalRead(VS_DREQ) == 1 && playingState == PS_PLAY && cur_file.isOpen() && !fastforward) {
-        byte readLen = 0;
-        readLen = cur_file.read(readBuf, READ_BUF_LEN);
-        vs1053.writeData(readBuf, readLen);
-        if (readLen < READ_BUF_LEN) {
-            vs1053.writeRegister(SPI_MODE, 0, SM_OUTOFWAV);
-            vs1053.sendZerosToVS10xx();
-            //report play done event here...
-            playingState = PS_POST_PLAY;
-            break;
+#if defined(ARDUINO_ARCH_AVR)
+    /**************************************************************/
+    ISR(TIMER1_OVF_vect) {        //Timer1 Service
+        //fill vs1053
+        while (digitalRead(VS_DREQ) == 1 && playingState == PS_PLAY && cur_file.isOpen() && !fastforward) {
+            byte readLen = 0;
+            readLen = cur_file.read(readBuf, READ_BUF_LEN);
+            vs1053.writeData(readBuf, readLen);
+            if (readLen < READ_BUF_LEN) {
+                vs1053.writeRegister(SPI_MODE, 0, SM_OUTOFWAV);
+                vs1053.sendZerosToVS10xx();
+                //report play done event here...
+                playingState = PS_POST_PLAY;
+                break;
+            }
+        }
+        //update
+        if (++timerloop >= 20) {
+            player._hardtime_update();
+            timerloop = 0;
         }
     }
-    //update
-    if (++timerloop >= 20) {
-        player._hardtime_update();
-        timerloop = 0;
+    /**************************************************************/
+    //=============================================================
+    #define RESOLUTION 65536    // Timer1 is 16 bit
+    void MusicPlayer::_init_timer1(void) {      //initialize Timer1 to 100us overflow
+        TCCR1A = 0;                 // clear control register A
+        TCCR1B = _BV(WGM13);        // set mode as phase and frequency correct pwm, stop the timer
+
+        long cycles;
+        long microseconds = 500;   //setup microseconds here
+        unsigned char clockSelectBits;
+        cycles = (F_CPU / 2000000) *
+                microseconds;                                // the counter runs backwards after TOP, interrupt is at BOTTOM so divide microseconds by 2
+        if (cycles < RESOLUTION) {
+            clockSelectBits = _BV(CS10);    // no prescale, full xtal
+        } else if ((cycles >>= 3) < RESOLUTION) {
+            clockSelectBits = _BV(CS11);    // prescale by /8
+        } else if ((cycles >>= 3) < RESOLUTION) {
+            clockSelectBits = _BV(CS11) | _BV(CS10);    // prescale by /64
+        } else if ((cycles >>= 2) < RESOLUTION) {
+            clockSelectBits = _BV(CS12);    // prescale by /256
+        } else if ((cycles >>= 2) < RESOLUTION) {
+            clockSelectBits = _BV(CS12) | _BV(CS10);    // prescale by /1024
+        } else {
+            cycles = RESOLUTION - 1, clockSelectBits = _BV(CS12) | _BV(CS10);    // request was out of bounds, set as maximum
+        }
+
+        ICR1 = cycles;
+        TCCR1B &= ~(_BV(CS10) | _BV(CS11) | _BV(CS12));
+        TCCR1B |= clockSelectBits;                                          // reset clock select register, and starts the clock
+
+        TIMSK1 = _BV(TOIE1);
+        TCNT1 = 0;
+        sei();                      //enable global interrupt
     }
-}
-/**************************************************************/
-//=============================================================
-#define RESOLUTION 65536    // Timer1 is 16 bit
-void MusicPlayer::_init_timer1(void) {      //initialize Timer1 to 100us overflow
-    TCCR1A = 0;                 // clear control register A
-    TCCR1B = _BV(WGM13);        // set mode as phase and frequency correct pwm, stop the timer
-
-    long cycles;
-    long microseconds = 500;   //setup microseconds here
-    unsigned char clockSelectBits;
-    cycles = (F_CPU / 2000000) *
-             microseconds;                                // the counter runs backwards after TOP, interrupt is at BOTTOM so divide microseconds by 2
-    if (cycles < RESOLUTION) {
-        clockSelectBits = _BV(CS10);    // no prescale, full xtal
-    } else if ((cycles >>= 3) < RESOLUTION) {
-        clockSelectBits = _BV(CS11);    // prescale by /8
-    } else if ((cycles >>= 3) < RESOLUTION) {
-        clockSelectBits = _BV(CS11) | _BV(CS10);    // prescale by /64
-    } else if ((cycles >>= 2) < RESOLUTION) {
-        clockSelectBits = _BV(CS12);    // prescale by /256
-    } else if ((cycles >>= 2) < RESOLUTION) {
-        clockSelectBits = _BV(CS12) | _BV(CS10);    // prescale by /1024
-    } else {
-        cycles = RESOLUTION - 1, clockSelectBits = _BV(CS12) | _BV(CS10);    // request was out of bounds, set as maximum
+#elif defined(ARDUINO_ARCH_SAMD)
+    #include <TimerTCC0.h>
+    void timerIsr() {          //Timer Service
+        //fill vs1053
+        while (digitalRead(VS_DREQ) == 1 && playingState == PS_PLAY && cur_file.isOpen() && !fastforward) {
+            byte readLen = 0;
+            readLen = cur_file.read(readBuf, READ_BUF_LEN);
+            vs1053.writeData(readBuf, readLen);
+            if (readLen < READ_BUF_LEN) {
+                vs1053.writeRegister(SPI_MODE, 0, SM_OUTOFWAV);
+                vs1053.sendZerosToVS10xx();
+                //report play done event here...
+                playingState = PS_POST_PLAY;
+                break;
+            }
+        }
+        //update
+        if (++timerloop >= 20) {
+            player._hardtime_update();
+            timerloop = 0;
+        }
     }
-
-    ICR1 = cycles;
-    TCCR1B &= ~(_BV(CS10) | _BV(CS11) | _BV(CS12));
-    TCCR1B |= clockSelectBits;                                          // reset clock select register, and starts the clock
-
-    TIMSK1 = _BV(TOIE1);
-    TCNT1 = 0;
-    sei();                      //enable global interrupt
-}
-
+    void MusicPlayer::_init_timer1(void) {
+        /*initialize TimerTcc0 to 100us overflow */
+        TimerTcc0.initialize(100);
+        TimerTcc0.attachInterrupt(timerIsr);
+    }
+#endif
 /**************************************************************/
 void MusicPlayer::begin(void) {
     initIOForLED();
@@ -183,7 +210,7 @@ void MusicPlayer::begin(void) {
     _playmode = PM_NORMAL_PLAY;
     playingState = PS_PRE_PLAY;
     _playmode = PM_NORMAL_PLAY;
-    ctrlState = CS_EMPTY;
+    ctrlState = CS_EMPTY; 
     /* init timer1 */
     _init_timer1();
 }
@@ -375,7 +402,7 @@ void MusicPlayer::_play(void) {
     }
 }
 /**************************************************************/
-void MusicPlayer::playOne(char* songFile) {
+void MusicPlayer::playOne(char const * songName) {
     /*  SdFile f;
         if (!f.open(&root, songFile, O_READ))
         {
@@ -389,13 +416,13 @@ void MusicPlayer::playOne(char* songFile) {
         {
         addToPlaylist(songFile);
         }*/
-    if (addToPlaylist(songFile)) {
+    if (addToPlaylist(songName)) {
         //added by shao
         //switch to this song
         for (int i = 0; i < spl.songTotalNum; i++) {
-            if (strcmp(songFile, spl.p_songFile[i]->name) == 0) {
+            if (strcmp(songName, spl.p_songFile[i]->name) == 0) {
                 showString(PSTR("Seeked to "));
-                Serial.println(songFile);
+                Serial.println(songName);
                 spl.currentSongNum = i;
                 playingState = PS_PRE_PLAY;
             }
@@ -485,7 +512,7 @@ void MusicPlayer::scanAndPlayAll(void) {
 }
 
 /**************************************************************/
-boolean MusicPlayer::_addToPlaylist(uint16_t index, char* songName) { //add a song to current playlist
+boolean MusicPlayer::_addToPlaylist(uint16_t index, char const * songName) { //add a song to current playlist
     if (spl.songTotalNum >= (MAX_SONG_TOTAL_NUM - 1)) {
         return false;
     }
@@ -517,7 +544,7 @@ boolean MusicPlayer::_addToPlaylist(uint16_t index, char* songName) { //add a so
     return false;
 }
 
-boolean MusicPlayer::addToPlaylist(char* songName) { //add a song to current playlist
+boolean MusicPlayer::addToPlaylist(char const * songName) { //add a song to current playlist
     SdFile f;
     if (!f.open(&root, songName, O_READ)) {
         Serial.print(songName);
@@ -538,7 +565,7 @@ boolean MusicPlayer::addToPlaylist(char* songName) { //add a song to current pla
 
 
 /**************************************************************/
-boolean MusicPlayer::deleteSong(char* songName) {
+boolean MusicPlayer::deleteSong(char const * songName) {
     boolean found = false;
     for (unsigned char i = 0; i < MAX_SONG_TOTAL_NUM; i++) {
         if (!found) {

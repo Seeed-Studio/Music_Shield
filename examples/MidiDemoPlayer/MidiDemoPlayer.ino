@@ -1,6 +1,4 @@
-#include <SD.h>
-#include <SPI.h>
-#include <arduino.h>
+
 #include <MusicPlayer.h>
 void setup() {
     // put your setup code here, to run once:

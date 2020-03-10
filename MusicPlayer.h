@@ -49,7 +49,6 @@
 
 #define MAX_SONG_TOTAL_NUM 40
 
-#define min(a,b) (((a)<(b))?(a):(b))
 
 /******************************************************************************/
 #define ENABLE_NUM_DIGIT 8      //for pin[7..0]
@@ -143,8 +142,8 @@ class MusicPlayer {
     void    begin(void);
     void    beginInMidiFmt(void);
 
-    void    playOne(char* songName);
-    boolean addToPlaylist(char* songName);
+    void    playOne(char const * songName);
+    boolean addToPlaylist(char const * songName);
     void    scanAndPlayAll(void);
     void    attachDigitOperation(int pinNum, void (*userFunc)(void), int mode);
     void    attachAnalogOperation(int pinNum, void (*userFunc)(void));
@@ -157,7 +156,7 @@ class MusicPlayer {
     void    setPlayMode(playMode_t playmode) {
         _playmode = playmode;
     }
-    boolean deleteSong(char* songName);
+    boolean deleteSong(char const * songName);
     void    keyEnable(void)    {
         Key_Disable = 0;
     }
@@ -221,8 +220,8 @@ class MusicPlayer {
     void    AvailableProcessorTime(void);
     boolean playlistIsEmpty(void);
     void    playlistInit(void);
-    boolean _addToPlaylist(uint16_t index, char* songName);
-    void    _playSong(char* songName);
+    boolean _addToPlaylist(uint16_t index, char const * songName);
+    void    _playSong(char const * songName);
     void    scanKey(void);
     void    scanAnalogSensor(void);
     void    scanDigitalSensor(void);

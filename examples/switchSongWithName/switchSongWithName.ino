@@ -34,9 +34,6 @@
 */
 
 
-#include <SD.h>
-#include <SPI.h>
-#include <arduino.h>
 #include <MusicPlayer.h>
 
 int which_play = 0;

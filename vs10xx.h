@@ -72,7 +72,7 @@
 #define SM_SDINEW	0x800   /**< VS10xx register */
 #define SM_ADPCM        0x1000   /**< VS10xx register */
 #define SM_ADPCM_HP     0x2000   /**< VS10xx register */
-class VS10XX : public SPIClass {
+class VS10XX {
   public:
     void selectControlBus(void)   {
         digitalWrite(VS_XCS, LOW);

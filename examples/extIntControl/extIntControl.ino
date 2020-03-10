@@ -30,9 +30,6 @@
 */
 
 
-#include <SD.h>
-#include <SPI.h>
-#include <arduino.h>
 #include <MusicPlayer.h>
 
 void setup() {

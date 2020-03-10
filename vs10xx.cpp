@@ -194,7 +194,7 @@ void VS10XX::sendZerosToVS10xx(void) {
  **@ retval:none
 */
 void VS10XX::loadMidiPlugin(void) {
-    int i = 0;
+    unsigned int i = 0;
     Serial.print("load MIDI Plugin...\r\n");
     while (i < sizeof(gVS1053_MIDI_Patch) / sizeof(gVS1053_MIDI_Patch[0])) {
         unsigned short addr, n, val;
