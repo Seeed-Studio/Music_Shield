@@ -160,6 +160,45 @@ void showString(PGM_P s) {
         TimerTcc0.initialize(100);
         TimerTcc0.attachInterrupt(timerIsr);
     }
+#elif defined(ARDUINO_ARCH_SAM)
+    //TC1 ch 0
+    void TC3_Handler() {          //Timer Service
+        //fill vs1053
+        while (digitalRead(VS_DREQ) == 1 && playingState == PS_PLAY && cur_file.isOpen() && !fastforward) {
+            byte readLen = 0;
+            readLen = cur_file.read(readBuf, READ_BUF_LEN);
+            vs1053.writeData(readBuf, readLen);
+            if (readLen < READ_BUF_LEN) {
+                vs1053.writeRegister(SPI_MODE, 0, SM_OUTOFWAV);
+                vs1053.sendZerosToVS10xx();
+                //report play done event here...
+                playingState = PS_POST_PLAY;
+                break;
+            }
+        }
+        //update
+        if (++timerloop >= 20) {
+            player._hardtime_update();
+            timerloop = 0;
+        }
+    }
+    void _startTimer(Tc *tc, uint32_t channel, IRQn_Type irq, uint32_t frequency) {
+        pmc_set_writeprotect(false);
+        pmc_enable_periph_clk((uint32_t)irq);
+        TC_Configure(tc, channel, TC_CMR_WAVE | TC_CMR_WAVSEL_UP_RC | TC_CMR_TCCLKS_TIMER_CLOCK4);
+        uint32_t rc = VARIANT_MCK/128/frequency; //128 because we selected TIMER_CLOCK4 above
+        TC_SetRA(tc, channel, rc/2); //50% high, 50% low
+        TC_SetRC(tc, channel, rc);
+        TC_Start(tc, channel);
+        tc->TC_CHANNEL[channel].TC_IER=TC_IER_CPCS;
+        tc->TC_CHANNEL[channel].TC_IDR=~TC_IER_CPCS;
+        NVIC_EnableIRQ(irq);
+    }
+    #define TIMERFREQUENCY 10000 // Time = 1 sec / TIMERFREQUENCY
+    void MusicPlayer::_init_timer1(void) {
+        /*initialize TimerTcc0 to 100us overflow */
+        _startTimer(TC1, 0, TC3_IRQn, TIMERFREQUENCY);
+    }
 #endif
 /**************************************************************/
 void MusicPlayer::begin(void) {
