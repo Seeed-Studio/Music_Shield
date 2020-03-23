@@ -32,8 +32,6 @@
 #ifndef MUSICPLAYER_H
 #define MUSICPLAYER_H
 
-
-
 #include <SD.h>
 #include "pins_config.h"
 #include "vs10xx.h"

@@ -32,6 +32,7 @@
 #ifndef PINS_CONFIG_H
 #define PINS_CONFIG_H
 
+#include <avr/io.h>
 #include <Arduino.h>
 ////////////////////For some control pins//////////////////////////
 #define ROTARY_ANGLE_SENSOR A4

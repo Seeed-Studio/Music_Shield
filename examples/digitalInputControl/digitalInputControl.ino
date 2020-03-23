@@ -32,10 +32,11 @@
 
 #include <SD.h>
 #include <SPI.h>
+#include <arduino.h>
 #include <MusicPlayer.h>
 
 void setup(void) {
-    SERIAL.begin(9600);
+    Serial.begin(9600);
     player.keyDisable(); //keys disable first;
     player.digitalControlEnable();
     player.begin();

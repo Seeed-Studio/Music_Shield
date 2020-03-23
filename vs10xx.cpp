@@ -51,12 +51,8 @@ const unsigned short gVS1053_MIDI_Patch[28] = {
  **@ retval:none
 */
 void VS10XX::init(void) {
-#ifdef ARDUINO_ARCH_SAM
-    SPI.begin(VS_XCS);
-#else
-     SPI.begin();
-#endif
-    SPI.setClockDivider(SPI_XCS    SPI_CLOCK_DIV16);
+    SPI.begin();
+    SPI.setClockDivider(SPI_CLOCK_DIV16);
     initIO();
     reset();
 }
@@ -70,15 +66,12 @@ void VS10XX::init(void) {
 void VS10XX::initForMidiFmt(void) {
     //init IO
     initIO();
+
     //init SPI
-#ifdef ARDUINO_ARCH_SAM
-    SPI.begin(VS_XCS);
-#else
-     SPI.begin();
-#endif
-    SPI.setBitOrder(SPI_XCS    MSBFIRST);
-    SPI.setDataMode(SPI_XCS    SPI_MODE0);
-    SPI.setClockDivider(SPI_XCS    SPI_CLOCK_DIV16);
+    SPI.begin();
+    SPI.setBitOrder(MSBFIRST);
+    SPI.setDataMode(SPI_MODE0);
+    SPI.setClockDivider(SPI_CLOCK_DIV16);
     //SPI.transfer(0xFF);	//transfer a dump
 
     //reset the chip
@@ -100,10 +93,10 @@ void VS10XX::writeRegister(unsigned char addressbyte, unsigned char highbyte, un
     // while (!readDREQ());
     deselectDataBus();
     selectControlBus();
-    SPI.transfer(SPI_XCS    VS_WRITE_COMMAND);
-    SPI.transfer(SPI_XCS    (addressbyte));
-    SPI.transfer(SPI_XCS    (highbyte));
-    SPI.transfer(SPI_XCS    (lowbyte));
+    SPI.transfer(VS_WRITE_COMMAND);
+    SPI.transfer((addressbyte));
+    SPI.transfer((highbyte));
+    SPI.transfer((lowbyte));
     deselectControlBus();
 }
 
@@ -115,7 +108,7 @@ void VS10XX::writeData(unsigned char* databuf, unsigned char datalen) {
     selectDataBus();
     while (!readDREQ());
     while (datalen--) {
-        SPI.transfer(SPI_XCS     *databuf++);
+        SPI.transfer(*databuf++);
     }
     deselectDataBus();
 }
@@ -126,13 +119,13 @@ unsigned int VS10XX::readRegister(unsigned char addressbyte) {
     unsigned char lowbyte = 0;
     deselectDataBus();
     selectControlBus(); //XCS = 0
-    SPI.transfer(SPI_XCS     VS_READ_COMMAND); //send read command
-    SPI.transfer(SPI_XCS     addressbyte);    //send register address
+    SPI.transfer(VS_READ_COMMAND); //send read command
+    SPI.transfer(addressbyte);    //send register address
     //be careful: when read 0xff,dump it,and read agin
     //while((h = SPIGetChar())== 0xff);
-    highbyte = SPI.transfer(SPI_XCS    0xff);
+    highbyte = SPI.transfer(0xff);
     //while((l = VsReadByte())== 0xff);
-    lowbyte = SPI.transfer(SPI_XCS    0xff);
+    lowbyte = SPI.transfer(0xff);
 
     result = (((unsigned int)highbyte << 8) | lowbyte);
     deselectControlBus();
@@ -150,8 +143,8 @@ void VS10XX::reset(void) {
     while (!readDREQ());
     /* Set clock register, doubler etc. */
     writeRegister(SPI_CLOCKF, 0xc0, 0x00);
-    SERIAL.print("\r\nVS10xx Clock Frq: 0x");
-    SERIAL.println(readRegister(SPI_CLOCKF), HEX);
+    Serial.print("\r\nVS10xx Clock Frq: 0x");
+    Serial.println(readRegister(SPI_CLOCKF), HEX);
     /* Wait for DREQ */
     while (!readDREQ());
     softReset(); //comment this, as it will be executed everytime playing a music file.
@@ -189,7 +182,7 @@ void VS10XX::sendZerosToVS10xx(void) {
     selectDataBus();
     for (i = 0; i < 2048; i++) {
         while (!readDREQ());
-        SPI.transfer(SPI_XCS    0);
+        SPI.transfer(0);
     }
     deselectDataBus();
 }
@@ -202,7 +195,7 @@ void VS10XX::sendZerosToVS10xx(void) {
 */
 void VS10XX::loadMidiPlugin(void) {
     int i = 0;
-    SERIAL.print("load MIDI Plugin...\r\n");
+    Serial.print("load MIDI Plugin...\r\n");
     while (i < sizeof(gVS1053_MIDI_Patch) / sizeof(gVS1053_MIDI_Patch[0])) {
         unsigned short addr, n, val;
         addr = gVS1053_MIDI_Patch[i++];
@@ -212,6 +205,6 @@ void VS10XX::loadMidiPlugin(void) {
             writeRegister(addr, val >> 8, val & 0xff);
         }
     }
-    SERIAL.print("done\r\n");
+    Serial.print("done\r\n");
 }
 /****************The end***********************************************/

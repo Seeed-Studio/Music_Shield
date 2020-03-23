@@ -32,10 +32,11 @@
 
 #include <SD.h>
 #include <SPI.h>
+#include <arduino.h>
 #include <MusicPlayer.h>
 
 void setup(void) {
-    SERIAL.begin(9600);
+    Serial.begin(9600);
     player.begin();                      //will initialize the hardware and set default mode to be normal.
     player.setPlayMode(PM_REPEAT_ONE); //set mode to repeat playing a song
     player.playOne("record.ogg");          //play a song with its name

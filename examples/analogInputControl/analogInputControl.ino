@@ -32,10 +32,11 @@
 
 #include <SD.h>
 #include <SPI.h>
+#include <arduino.h>
 #include <MusicPlayer.h>
 
 void setup(void) {
-    SERIAL.begin(9600);
+    Serial.begin(9600);
     player.keyDisable(); //keys disable first;
     player.analogControlEnable(); //enable to scan the A4/A5
     player.begin(); //will initialize the hardware and set default mode to be normal.

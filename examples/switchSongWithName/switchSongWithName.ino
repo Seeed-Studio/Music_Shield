@@ -36,6 +36,7 @@
 
 #include <SD.h>
 #include <SPI.h>
+#include <arduino.h>
 #include <MusicPlayer.h>
 
 int which_play = 0;
@@ -43,7 +44,7 @@ char mp3name[2][10] = {"2.mp3", "1.mp3"};
 int flag = 0;
 
 void setup(void) {
-    SERIAL.begin(9600);
+    Serial.begin(9600);
     player.begin();  //will initialize the hardware and set default mode to be normal.
     player.keyDisable();
     player.setPlayMode(PM_REPEAT_ONE); //set mode to repeat playing a song
