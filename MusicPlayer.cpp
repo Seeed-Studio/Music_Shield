@@ -74,10 +74,10 @@ int freeRam() {
 void showString(PGM_P s) {
     char c;
     while ((c = pgm_read_byte(s++)) != 0) {
-        Serial.print(c);
+        SERIAL.print(c);
     }
 }
-
+#ifdef ARDUINO_ARCH_AVR
 /**************************************************************/
 ISR(TIMER1_OVF_vect) {        //Timer1 Service
     //fill vs1053
@@ -134,6 +134,68 @@ void MusicPlayer::_init_timer1(void) {      //initialize Timer1 to 100us overflo
     sei();                      //enable global interrupt
 }
 
+#endif
+#ifdef ARDUINO_ARCH_SAM
+void TC0_Handler() {
+  static uint32_t Count = 10000;
+  TC0->TC_CHANNEL[0].TC_SR;  // Read and clear status register
+  Count--;
+ if (Count == 0) {
+ 
+//     PIOB->PIO_ODSR ^= PIO_ODSR_P27;  // Toggle LED with a 1 Hz frequency
+//     Count = 1000000;
+//   }
+    //fill vs1053
+    while (digitalRead(VS_DREQ) == 1 && playingState == PS_PLAY && cur_file.isOpen() && !fastforward) {
+        byte readLen = 0;
+        readLen = cur_file.read(readBuf, READ_BUF_LEN);
+        vs1053.writeData(readBuf, readLen);
+        if (readLen < READ_BUF_LEN) {
+            vs1053.writeRegister(SPI_MODE, 0, SM_OUTOFWAV);
+            vs1053.sendZerosToVS10xx();
+            //report play done event here...
+            playingState = PS_POST_PLAY;
+            break;
+        }
+    }
+    //update
+    if (++timerloop >= 20) {
+        player._hardtime_update();
+        timerloop = 0;
+    }
+    Count = 10000;
+ }
+}
+
+
+void MusicPlayer::_init_timer1(void) { 
+
+  PMC->PMC_PCER0 |= PMC_PCER0_PID12;                     // PIOB power ON
+  PIOB->PIO_OER |= PIO_OER_P27;
+  PIOB->PIO_OWER |= PIO_OWER_P27;                          // Built In LED output write enable
+
+  /*************  Timer Counter 0 Channel 0 to generate PWM pulses thru TIOA0  ************/
+  PMC->PMC_PCER0 |= PMC_PCER0_PID27;                      // TC0 power ON - Timer Counter 0 channel 0 IS TC0
+
+  PIOB->PIO_PDR |= PIO_PDR_P25;                           // The pin is no more driven by the GPIO
+  PIOB->PIO_ABSR |= PIO_PB25B_TIOA0;                      // TIOA0 (pin 2) is PB25 peripheral type B
+
+  TC0->TC_CHANNEL[0].TC_CMR = TC_CMR_TCCLKS_TIMER_CLOCK1  // MCK/2, clk on rising edge
+                              | TC_CMR_WAVE               // Waveform mode
+                              | TC_CMR_WAVSEL_UP_RC        // UP mode with automatic trigger on RC Compare
+                              | TC_CMR_ACPA_CLEAR          // Clear TIOA0 on RA compare match
+                              | TC_CMR_ACPC_SET;           // Set TIOA0 on RC compare match
+
+  TC0->TC_CHANNEL[0].TC_RC = 42;  //<*********************  Frequency = (Mck/2)/TC_RC  Hz = 1 MHz
+  TC0->TC_CHANNEL[0].TC_RA = 5;  //<********************   Any Duty cycle between 1 and TC_RC, Duty cycle = (TC_RA/TC_RC) * 100  %
+
+  TC0->TC_CHANNEL[0].TC_IER = TC_IER_CPCS;                 // Interrupt on RC compare match
+  NVIC_EnableIRQ(TC0_IRQn);                                // TC1 Interrupt enable
+
+  TC0->TC_CHANNEL[0].TC_CCR = TC_CCR_SWTRG | TC_CCR_CLKEN; // Software trigger TC0 counter and enable
+} 
+
+#endif 
 /**************************************************************/
 void MusicPlayer::begin(void) {
     initIOForLED();
@@ -147,8 +209,8 @@ void MusicPlayer::begin(void) {
     _keys[4].setPara(KEY_NT, 3, 100, CS_NEXT);
     vs1053.init();
     /* init sd card */
-    //SD.begin(chipSelect);
-    pinMode(chipSelect, OUTPUT);
+    SD.begin(chipSelect);
+    //pinMode(chipSelect, OUTPUT);
     if (!card.init(SPI_HALF_SPEED, chipSelect)) {
         showString(PSTR("initialization failed. Things to check:\r\n"));
         showString(PSTR("* is a card is inserted?\r\n"));
@@ -175,7 +237,7 @@ void MusicPlayer::begin(void) {
         return;
     }
     showString(PSTR("Volume type is FAT"));
-    Serial.println(volume.fatType(), DEC);
+    SERIAL.println(volume.fatType(), DEC);
     root.openRoot(volume);
 
     playlistInit();
@@ -240,13 +302,13 @@ void MusicPlayer::_play(void) {
             songFile = spl.p_songFile[spl.currentSongNum];
 
             if (!cur_file.open(&root, songFile->index, O_READ)) {
-                Serial.print(songFile->name);
+                SERIAL.print(songFile->name);
                 showString(PSTR(" open failed.\r\n"));
                 playingState = PS_POST_PLAY;
                 break;
             }
             showString(PSTR("Playing song "));
-            Serial.print(songFile->name);
+            SERIAL.print(songFile->name);
             showString(PSTR(" ...\r\n"));
             playingState = PS_PLAY;
             break;
@@ -379,7 +441,7 @@ void MusicPlayer::playOne(char* songFile) {
     /*  SdFile f;
         if (!f.open(&root, songFile, O_READ))
         {
-        Serial.print(songFile);
+        SERIAL.print(songFile);
         showString(PSTR(" does not exists.\r\n"));
         return;
         }
@@ -395,7 +457,7 @@ void MusicPlayer::playOne(char* songFile) {
         for (int i = 0; i < spl.songTotalNum; i++) {
             if (strcmp(songFile, spl.p_songFile[i]->name) == 0) {
                 showString(PSTR("Seeked to "));
-                Serial.println(songFile);
+                SERIAL.println(songFile);
                 spl.currentSongNum = i;
                 playingState = PS_PRE_PLAY;
             }
@@ -446,7 +508,7 @@ void MusicPlayer::scanAndPlayAll(void) {
 
             // print file name with possible blank fill
             SdFile::dirName(p, name);
-            //Serial.print("try to open file ");
+            //SERIAL.print("try to open file ");
             //showString(PSTR(name);
 
             /* filter the song type */
@@ -458,7 +520,7 @@ void MusicPlayer::scanAndPlayAll(void) {
             }
 
             uint16_t index = (curPos - 32) >> 5;
-            //Serial.print("file index: ");
+            //SERIAL.print("file index: ");
             //showString(PSTR(index);
 
             /*  if (f.open(&root, index, O_READ))
@@ -470,12 +532,12 @@ void MusicPlayer::scanAndPlayAll(void) {
                 showString(PSTR("ugh, cant open it");
                 }
                 root.seekSet(curPos);*/
-            //Serial.println(freeRam());
+            //SERIAL.println(freeRam());
             _addToPlaylist(index, name);
             n++;
-            Serial.print(n);
+            SERIAL.print(n);
             showString(PSTR(". "));
-            Serial.println(s);
+            SERIAL.println(s);
         }  //end while
 
         spl.currentSongNum = 0;
@@ -491,14 +553,14 @@ boolean MusicPlayer::_addToPlaylist(uint16_t index, char* songName) { //add a so
     }
 
     if (_inPlayList(index)) {
-        Serial.print(songName);
+        SERIAL.print(songName);
         showString(PSTR(" already exists in playlist.\r\n"));
         return true;
     }
 
     SdFile f;
     if (!f.open(&root, index, O_READ)) {
-        Serial.print(songName);
+        SERIAL.print(songName);
         showString(PSTR(" cant be opened.\r\n"));
         return false;
     }
@@ -520,17 +582,17 @@ boolean MusicPlayer::_addToPlaylist(uint16_t index, char* songName) { //add a so
 boolean MusicPlayer::addToPlaylist(char* songName) { //add a song to current playlist
     SdFile f;
     if (!f.open(&root, songName, O_READ)) {
-        Serial.print(songName);
+        SERIAL.print(songName);
         showString(PSTR(" is not found.\r\n"));
         return false;
     }
     f.close();
     uint32_t pos = root.curPosition();
     return _addToPlaylist((pos >> 5) - 1, songName);
-    Serial.print("Add to play list: index");
-    Serial.print((pos >> 5) - 1);
-    Serial.print("  songName:");
-    Serial.println(songName);
+    SERIAL.print("Add to play list: index");
+    SERIAL.print((pos >> 5) - 1);
+    SERIAL.print("  songName:");
+    SERIAL.println(songName);
 
 
 }
@@ -549,8 +611,8 @@ boolean MusicPlayer::deleteSong(char* songName) {
                 found = true;
                 free(spl.p_songFile[i]);
                 spl.p_songFile[i] = 0;
-                Serial.print("Delete song:");
-                Serial.println(songName);
+                SERIAL.print("Delete song:");
+                SERIAL.println(songName);
             }
         } else {
             spl.p_songFile[i - 1] = spl.p_songFile[i];
@@ -908,9 +970,9 @@ void MusicPlayer::beginInMidiFmt(void) {
     initIOForLED();
 
     //Init VS105B in Midi Format
-    Serial.print("Init vs10xx in MIDI format...");
+    SERIAL.print("Init vs10xx in MIDI format...");
     vs1053.initForMidiFmt();
-    Serial.print("done\r\n");
+    SERIAL.print("done\r\n");
 
     pinMode(chipSelect, OUTPUT);
 }
@@ -944,8 +1006,8 @@ void MusicPlayer::midiNoteOff(byte channel, byte note, byte rate) {
 }
 
 void MusicPlayer::midiSendByte(byte data) {
-    SPI.transfer(0x00);
-    SPI.transfer(data);
+    SPI.transfer(SPI_XCS    0x00);
+    SPI.transfer(SPI_XCS    data);
 }
 
 /*
@@ -959,18 +1021,18 @@ void MusicPlayer::midiDemoPlayer(void) {
     midiWriteData(0xB0, 0x07, 120);
 
     //GM2 Mode
-    Serial.print("Fancy Midi Sounds\r\n");
+    SERIAL.print("Fancy Midi Sounds\r\n");
     midiWriteData(0xB0, 0, 0x78);
     for (int instrument = 30 ; instrument < 31 ; instrument++) {
-        Serial.print(" Instrument: ");
-        Serial.println(instrument, DEC);
+        SERIAL.print(" Instrument: ");
+        SERIAL.println(instrument, DEC);
 
         midiWriteData(0xC0, instrument, 0);    //Set instrument number. 0xC0 is a 1 data byte command
 
         //Play notes from F#-0 (30) to F#-5 (90):
         for (int note = 27 ; note < 87 ; note++) {
-            Serial.print("N:");
-            Serial.println(note, DEC);
+            SERIAL.print("N:");
+            SERIAL.println(note, DEC);
             //Note on channel 1 (0x90), some note value (note), middle velocity (0x45):
             midiNoteOn(0, note, 127);
             delay(50);

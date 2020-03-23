@@ -32,11 +32,10 @@
 
 #include <SD.h>
 #include <SPI.h>
-#include <arduino.h>
 #include <MusicPlayer.h>
 
 void setup() {
-    Serial.begin(9600);
+    SERIAL.begin(9600);
     player.keyDisable();//keys disable first;All the keys will be invalid.
     player.begin(); //will initialize the hardware and set default mode to be normal.
     player.setPlayMode(PM_REPEAT_ONE); //set mode to repeat to play a song

@@ -1,10 +1,9 @@
 #include <SD.h>
 #include <SPI.h>
-#include <arduino.h>
 #include <MusicPlayer.h>
 void setup() {
     // put your setup code here, to run once:
-    Serial.begin(9600);
+    SERIAL.begin(9600);
     player.beginInMidiFmt();
 }
 

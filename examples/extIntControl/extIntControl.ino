@@ -32,11 +32,10 @@
 
 #include <SD.h>
 #include <SPI.h>
-#include <arduino.h>
 #include <MusicPlayer.h>
 
 void setup() {
-    Serial.begin(9600);
+    SERIAL.begin(9600);
     player.keyDisable();//keys disable first;
     player.begin();//will initialize the hardware and set default mode to be normal.
     attachInterrupt(0, playNextSong, FALLING); //pin2 -> INT0,pin3 -> INT1,pin21 of MEGA can be INT2

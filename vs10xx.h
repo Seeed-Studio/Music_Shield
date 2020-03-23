@@ -35,6 +35,16 @@
 #include <SPI.h>
 #include "pins_config.h"
 
+#ifdef ARDUINO_ARCH_SAM
+#define SERIAL SerialUSB
+#define SPI_XCS  VS_XCS,
+#else
+#define SERIAL Serial
+#define SPI_XCS  
+#endif
+
+
+
 /** VS10xx SCI Write Command byte is 0x02 */
 #define VS_WRITE_COMMAND 0x02
 /** VS10xx SCI Read Command byte is 0x03 */
@@ -72,7 +82,7 @@
 #define SM_SDINEW	0x800   /**< VS10xx register */
 #define SM_ADPCM        0x1000   /**< VS10xx register */
 #define SM_ADPCM_HP     0x2000   /**< VS10xx register */
-class VS10XX : public SPIClass {
+class VS10XX {
   public:
     void selectControlBus(void)   {
         digitalWrite(VS_XCS, LOW);
